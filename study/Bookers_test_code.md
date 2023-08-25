@@ -296,7 +296,193 @@ changeの値にBook.count（Bookのデータ数）を指定しており、by(-1)
 このように記述することで、今どうなっているかだけではなく、どう変更されたかもチェックすることができます。
 
 changeを使った例にはfrom,toによる記述の仕方もあります。
-　~~~ruby
+~~~ruby
  x = 10
 expect{x += 5}.to change{x}.from(10).to(15)
 ~~~
+
+
+## FactoryBotとは
+FactoryBotはテストデータの作成をサポートするGemです。
+bookersのGemfileでgroup :test do ~ end の箇所に記載されています。
+
+使用方法についてはbookersを確認しながら見ていきましょう。
+FactoryBotを使用するにはspec/factories/モデル名.rbといった形でファイルを作成します。
+bookersの場合はspec/factories/book.rbというファイル構成になっています。
+
+次にテストデータの定義をコードで記述します。
+spec/factories/book.rbを確認すると以下のようになっています。
+
+~~~spec/factories/book.rb
+:
+:
+
+FactoryBot.define do
+  factory :book do
+    title { Faker::Lorem.characters(number:5) }
+    body { Faker::Lorem.characters(number:20) }
+  end
+end
+~~~
+**FactoryBot.define do ~ end**：宣言文でありデータの定義を行う際に記述します。
+**factory :book do ~ end**：どのモデルに対してデータ定義を行うのか記します。factory :モデル名 do ~ end
+**title { Faker::Lorem.characters(number:5) }**：カラム名｛ 値 ｝の形になっています。※Fakerについては後述
+**body { Faker::Lorem.characters(number:20) }**：カラム名｛ 値 ｝の形になっています。
+
+このようにFactoryBotではspec/factories/モデル名.rbにテストデータの定義を記述します。
+
+では定義したデータをどのように使用していくのかを確認しましょう。
+models/book_spec.rbの8行目
+~~~ruby
+expect(FactoryBot.build(:book)).to be_valid
+~~~
+ここでexpectの期待値でFactoryBot.build(:book)として使用されています。
+FactoryBot.build(:モデル名)で対象モデルのインスタンスを作成します。
+
+FactoryBotを使用すればit部などにいちいちインスタンスをnewして値を代入する必要性がなくなり、簡潔に記述することが可能です。
+
+## Fakerとは
+Fakerとはテスト用のダミーデータを作成するためのGemです。
+bookersのGemfileでgroup :test do ~ doの箇所に記載されています。
+Fakerは様々な場面で使用されますが、bookersのテストコードの場合はFactoryBotのテストデータの定義をする中で使用されています。
+またsystem/books_spec.rbの中でフォームの入力値にもFakerが使用されています。
+
+spec/factories/book.rbの中で使用されているFakerの記述を確認
+~~~ruby
+:
+:
+
+FactoryBot.define do
+  factory :book do
+    title { Faker::Lorem.characters(number:5) }
+    body { Faker::Lorem.characters(number:20) }
+  end
+end
+~~~
+カラムに対しての値としてダミーデータを使用していることがわかります。
+~~~
+Faker::Lorem.characters(number:5)
+~~~
+この記述を分解すると以下のようになります。
+
+**Faker::** ：Fakerを使用する時の宣言
+**Lorem**：ダミーテキストタイプを選択　※Lorem=lorem ipsumの略でダミーテキストの意味
+**characters**：文字列を作成
+**number**：生成文字数の指定
+
+ランダムな英数文字列を5文字生成するということになります。
+
+#### Fakerの補足
+Fakerで生成できるダミーデータはランダムな英数文字列だけではありません。
+
+名前のようなダミーデータの生成
+~~~
+Faker::Name.name      # => "Taro Yamada"
+~~~
+
+メールアドレスのようなダミーデータ
+~~~
+Faker::Internet.email # => "example@hoge.com"
+~~~
+このように様々なタイプのダミーデータを作成できるため、実データに近い条件でテストを行うことが出来るようになります。
+
+## letとは
+letとはインスタンス変数を置き換えるときに使用します。
+
+spec/books_spec.rbの4行目を見てみましょう。
+~~~
+let!(:book) { create(:book,title:'hoge',body:'body') }
+~~~
+このletを使用した記述の仕方は以下と似た意味を持っています。
+~~~
+before do
+  @book = FactoryBot.create(title:'hoge',body:'body') 
+end
+~~~
+letの(:book)はインスタンス変数としての役割を持っていることになります。
+### letとlet!の違い
+let!を使用した上記の記述の場合beforeブロックと同様にitの外で処理が実行されます。
+letの場合には初めてbookが呼ばれたときにcreateが実行されます。このような処理を遅延評価といいます。
+let!とした場合には事前評価になります。
+
+letとbeforeの使い分けはコードの読みやすさにも関わってきます。
+実装するテストコードによって工夫しながら使い分けていきます。
+#### 補足
+~~~
+let!(:book) { create(:book,title:'hoge',body:'body') }
+~~~
+こちらのコードは
+~~~
+let!(:book) { FactoryBot.create(:book,title:'hoge',body:'body') }
+~~~
+FactoryBotが省略されて記述されています。
+
+このように省略するためにbookersではspec/rails_helper.rbに設定を加えています。
+~~~
+:
+:
+
+RSpec.configure do |config|
+  
+  :
+  :
+
+  config.include FactoryBot::Syntax::Methods
+end
+~~~
+
+## Capybaraとは
+Capybaraは結合テストやE2Eテスト（システム全体を通したテスト）などと呼ばれるテストに使用するツールです。
+Capybaraではアプリケーションを実際に動かしているかのようなシュミレートを行いテストを行ってくれます。
+例えば以下のようなものです。
+
+1. 〇〇ページに遷移する
+2. フォームにhogeを入力する
+3. 保存ボタンを押す
+4. 保存した後のリダイレクト先が〇〇ページである
+このように実際のシステムの利用を想定した流れでテストを行います。
+
+bookersのGemfileでgroup :test do ~ doの箇所に記載されています。
+### Capybaraの実行環境
+Capybaraが動作するときにはドライバと言われる実行環境を選択できます。
+主な実行環境として以下のものがあります。
+
+* Rack::Test： Rails標準のテスト機能で、高速に動作します。
+* Selenium：JavasScript使用時の実行環境です。ブラウザを起動するため、実行速度は遅いです。
+* 
+bookersのテストコードではドライバにRack::Testを選択して実行しています。
+System Specを実行の際にRack::Testでテストを行うには設定が必要です。
+設定箇所を確認してみましょう。
+
+まずはspec/spec_helper.rbです。
+~~~
+:
+:
+
+RSpec.configure do |config|
+  config.before(:each, type: :system) do
+
+    :
+    :
+
+    driven_by :rack_test
+  end
+
+:
+:
+~~~
+`driven_by :rack_test`の記述が必要です。
+#### 補足
+Rails newしたデフォルトのGemfileのgroup :test do ~ doは以下のようになっています。
+~~~
+group :test do
+  # Adds support for Capybara system testing and selenium driver
+  gem 'capybara', '>= 3.26'
+  gem 'selenium-webdriver', '>= 4.0.0.rc1'
+  # Easy installation and use of web drivers to run system tests with browsers
+  gem 'webdrivers'
+end
+~~~
+この状態でSystem Specのテストを行おうとすると、CapybaraのドライバにSeleniumを使用してテストを実行します。
+Seleniumではブラウザを立ち上げてテストを実行しますが、ブラウザが存在しないためエラーになります。
+この場合には開発環境（Cloud9等）にGoogle Chromeをインストールする必要があります。
