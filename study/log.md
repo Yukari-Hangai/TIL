@@ -8,3 +8,6 @@
  Chapter 4 Javaの基本文法を理解しよう
 
  Chapter 5 変数を学ぼう
+
+## 9/6
+ Chapter 6 型の基本を学ぼう
