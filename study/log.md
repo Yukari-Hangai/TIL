@@ -17,3 +17,9 @@
  
  Chapter 8 条件分岐を学ぼう
 
+## 9/8
+ Chapter 9 繰り返しを学ぼう
+
+## 9/11
+ Chapter 10 提出課題：FizzBuzz
+ 
