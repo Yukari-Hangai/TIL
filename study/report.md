@@ -135,7 +135,7 @@ int array[] = { 0, 1, 2, 3, 4};
 
 int (*pointer)[10] = &array; //arrayはint[5]型なのでint[10]型へのポインターには代入できないのでエラー。
 ```
-&nbsp;
+&nbsp;  
 配列へのポインターや参照は型に配列の長さの情報を持っているので、範囲for文で走査できる。↓
 ```配列のポインターと参照.cpp
 #include <iostream>
@@ -193,4 +193,30 @@ int (*function(int a))[10]
 {
   .....
 }
+```
+&nbsp;  
+&nbsp;  
+**練習問題**  
+1. つぎのプログラムに、配列を逆順にするreverse()関数を定義してください。reverce()関数は配列とその配列の長さを受け取ります。
+```
+#include <iostream>
+
+//ここにreverce()を定義
+
+int main()
+{
+	int array[] = { 0, 1, 2, 3, 4 };
+
+	reverce(array, 5); //引数は配列とその長さ
+
+	std::cout << array[0] << std::endl;
+	std::cout << array[1] << std::endl;
+	std::cout << array[2] << std::endl;
+	std::cout << array[3] << std::endl;
+	std::cout << array[4] << std::endl;
+
+}
+```
+↓解答
+```
 ```
