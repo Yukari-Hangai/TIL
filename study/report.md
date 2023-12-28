@@ -207,7 +207,7 @@ int main()
 {
 	int array[] = { 0, 1, 2, 3, 4 };
 
-	reverce(array, 5); //引数は配列とその長さ
+	reverse(array, 5); //引数は配列とその長さ
 
 	std::cout << array[0] << std::endl;
 	std::cout << array[1] << std::endl;
@@ -217,6 +217,51 @@ int main()
 
 }
 ```
-↓解答
+↓解答(自分なりの解釈をコメントにて残しました。）
+```解答.cpp
+#include <iostream>
+
+void reverse(int* array, int size)
+{
+	for (int i = 0; i < size / 2; ++i)
+	{
+		int tmp = array[i]; //元の配列（配列の最小）の値をtmpに代入
+		array[i] = array[size - 1 - i]; //array[i]にarray[size - 1 -i](要素数から1とsizeを引いて配列の最大値を入れる。
+		array[size - 1 - i] = tmp; //array[size - 1 -i]に元の配列（配列の最小）を代入
+	}
+}
+
+int main()
+{
+	int array[] = { 0, 1, 2, 3, 4 };
+
+	reverse(array, 5); //引数は配列とその長さ
+
+	std::cout << array[0] << std::endl;
+	std::cout << array[1] << std::endl;
+	std::cout << array[2] << std::endl;
+	std::cout << array[3] << std::endl;
+	std::cout << array[4] << std::endl;
+
+}
 ```
+
+2. ポインターのみを使って（範囲for文や添字演算子を使わずに）配列の要素を列挙して下さい。  
+
+↓解答
+```解答.cpp
+#include <iostream>
+
+int main()
+{
+    int array[] = { 0, 1, 2, 3, 4, 5};
+
+    //↓int* ptr = arrayで配列の先頭のアドレスをptrに代入、ptr != (array + 6：配列の要素数)でptrが配列の最後を超えていないかを確認
+    for (int* ptr = array; ptr != (array + 6); ++ptr)
+    {
+        std::cout << *ptr << std::endl;//*をつけることでアドレスではなく値を指定
+    }
+
+
+}
 ```
