@@ -240,6 +240,48 @@ void some_function(home home); //値で受け取る関数
 &nbsp;  
 &nbsp;  
 **練習問題**  
-1.右辺値参照を受け取る関数を定義し、何か変数を実引数にして呼び出してください。
+1.右辺値参照を受け取る関数を定義し、何か変数を実引数にして呼び出してください。  
 ↓解答
+```解答.cpp
+#include <iostream>
+#include <utility>
+
+void show(int&& rref)
+{
+	std::cout << rref << std::endl;
+}
+
+int main()
+{
+	int i = 42;
+	show(std::move(i));
+}
+```
+&nbsp;  
+2.ムーブコンストラクターとコピーコンストラクターを定義して呼び分けてください。  
+↓解答
+```解答.cpp
+#include <iostream>
+#include <utility>
+
+class A
+{
+public:
+	A(){}
+	A(const A& other) //コピーコンストラクタ
+	{
+		std::cout << "コピーコンストラクター" << std::endl;
+	}
+	A(A&& other) //ムーブコンストラクター
+	{
+		std::cout << "ムーブコンストラクター" << std::endl;
+	}
+};
+
+int main()
+{
+	A a;
+	A c(a);//コピーコンストラクター
+	A m(std::move(a)); //ムーブコンストラクター
+{
 ```
